@@ -98,7 +98,7 @@ def guardar_rostro_biometrico():
             Image={'Bytes': image_bytes},
             ExternalImageId=str(matricula),  # La matrícula es la etiqueta del rostro
             MaxFaces=1,
-            DetectionAttributes=['NONE']
+            DetectionAttributes=['DEFAULT']  # CORREGIDO: 'NONE' ya no es válido en la API actual
         )
         print(f"[CandadoBiométrico] ✅ Rostro de '{matricula}' sellado en AWS.")
         return jsonify({"exito": True, "mensaje": f"Rostro de {matricula} registrado exitosamente."})
