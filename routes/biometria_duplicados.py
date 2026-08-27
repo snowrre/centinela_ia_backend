@@ -51,7 +51,7 @@ def verificar_duplicado_biometrico():
         response = rekognition.search_faces_by_image(
             CollectionId=COLECCION_ID,
             Image={'Bytes': image_bytes},
-            FaceMatchThreshold=95.0,
+            FaceMatchThreshold=80.0,  # Bajado de 95% a 80% para mayor agresividad
             MaxFaces=1
         )
 
