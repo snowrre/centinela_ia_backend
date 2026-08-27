@@ -105,3 +105,68 @@ def guardar_rostro_biometrico():
     except Exception as e:
         print(f"[CandadoBiométrico] Error al indexar rostro: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+# =======================================================
+# 4. MONITOR UNIVERSAL: CELULARES + SUPLANTACIÓN (2 en 1)
+# =======================================================
+@biometria_duplicados_bp.route('/api/monitoreo_continuo', methods=['POST'])
+def monitoreo_continuo():
+    """
+    Recibe una foto + matrícula del alumno en examen.
+    Devuelve en un solo viaje: is_phone, es_el_alumno, razon.
+    """
+    if 'foto' not in request.files or 'matricula' not in request.form:
+        return jsonify({"error": "Faltan datos"}), 400
+
+    image_bytes = request.files['foto'].read()
+    matricula_esperada = request.form['matricula'].strip()
+
+    reporte = {
+        "is_phone": False,
+        "es_el_alumno": False,
+        "razon": ""
+    }
+
+    try:
+        # TAREA A: Detectar celulares
+        res_labels = rekognition.detect_labels(
+            Image={'Bytes': image_bytes},
+            MaxLabels=15,
+            MinConfidence=80.0
+        )
+        for label in res_labels['Labels']:
+            if label['Name'] in ['Cell Phone', 'Mobile Phone', 'Smartphone', 'Telephone']:
+                reporte["is_phone"] = True
+                print(f"[Monitor] 📱 Celular detectado: {label['Name']} ({label['Confidence']:.1f}%)")
+                break
+
+        # TAREA B: Verificar que el rostro pertenece al alumno registrado
+        res_faces = rekognition.search_faces_by_image(
+            CollectionId=COLECCION_ID,
+            Image={'Bytes': image_bytes},
+            FaceMatchThreshold=80.0,
+            MaxFaces=1
+        )
+
+        if len(res_faces['FaceMatches']) > 0:
+            matricula_detectada = res_faces['FaceMatches'][0]['Face']['ExternalImageId']
+            similitud = res_faces['FaceMatches'][0]['Similarity']
+            if matricula_detectada == matricula_esperada:
+                reporte["es_el_alumno"] = True
+                print(f"[Monitor] ✅ Alumno verificado: {matricula_detectada} ({similitud:.1f}%)")
+            else:
+                reporte["razon"] = f"SUPLANTACIÓN: Rostro de '{matricula_detectada}' en lugar de '{matricula_esperada}'."
+                print(f"[Monitor] 🚨 {reporte['razon']}")
+        else:
+            reporte["razon"] = "SUPLANTACIÓN: Rostro desconocido o no registrado."
+
+        return jsonify(reporte)
+
+    except rekognition.exceptions.InvalidParameterException:
+        # Cámara tapada o sin rostro claro
+        reporte["razon"] = "No se detecta rostro claro"
+        return jsonify(reporte)
+    except Exception as e:
+        print(f"🔥 [Monitor] Error crítico: {str(e)}")
+        return jsonify({"error": str(e)}), 400
