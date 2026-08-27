@@ -65,7 +65,7 @@ def create_preference():
         if preference_response["status"] == 201:
             return jsonify({"id": preference_response["response"]["id"], "init_point": preference_response["response"]["init_point"]}), 200
         else:
-            return jsonify({"error": "Error al crear preferencia"}), 400
+            return jsonify({"error": "Error al crear preferencia", "details": preference_response}), 400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
