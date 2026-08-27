@@ -28,11 +28,11 @@ def detectar_celular():
 
     try:
         # 2. Llamada al Francotirador de AWS Rekognition (DetectLabels)
-        # MinConfidence=65.0: Un punto de equilibrio perfecto para no alucinar
+        # MinConfidence=80.0: Un punto de equilibrio perfecto para no alucinar
         response = rekognition.detect_labels(
             Image={'Bytes': image_bytes},
             MaxLabels=15,
-            MinConfidence=65.0
+            MinConfidence=80.0
         )
 
         is_phone = False
@@ -41,10 +41,10 @@ def detectar_celular():
         # 3. Analizar la respuesta JSON de AWS
         for label in response['Labels']:
             # Buscamos estas palabras clave en las etiquetas devueltas por AWS
-            if label['Name'] in ['Cell Phone', 'Mobile Phone', 'Electronics', 'Smart Phone', 'Phone']:
+            if label['Name'] in ['Cell Phone', 'Mobile Phone', 'Smartphone', 'Telephone']:
                 is_phone = True
                 nombre_etiqueta = label['Name'] # Guardamos cuál detectó
-                print(f"--- ¡AWS REKOGNITION DETECTÓ UN TELÉFONO! ({label['Name']} con {label['Confidence']:.2f}% de confianza) ---")
+                print(f"--- ¡AWS DETECTÓ UN TELÉFONO REAL! ({label['Name']} con {label['Confidence']:.2f}% de confianza) ---")
                 break # En cuanto detecte uno, detenemos la búsqueda
 
         # 4. Regresar el veredicto al Frontend
