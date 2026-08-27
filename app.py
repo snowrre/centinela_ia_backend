@@ -9,6 +9,7 @@ from routes.verificar_rostro import verificar_rostro_bp
 from routes.lector_examenes import lector_examenes_bp
 from routes.verificar_rostro_examen import verificar_rostro_examen_bp
 from routes.detectar_objetos import detectar_objetos_bp
+from routes.biometria_duplicados import biometria_duplicados_bp
 
 # Cargar variables de entorno
 load_dotenv()
@@ -25,6 +26,7 @@ app.register_blueprint(verificar_rostro_bp)
 app.register_blueprint(lector_examenes_bp)
 app.register_blueprint(verificar_rostro_examen_bp)
 app.register_blueprint(detectar_objetos_bp)
+app.register_blueprint(biometria_duplicados_bp)
 
 @app.route('/')
 def home():
