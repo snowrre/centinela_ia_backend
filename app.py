@@ -41,7 +41,7 @@ def create_preference():
         price = 39999 if plan == 'campus' else 14999
         title = f"Licencia Centinela IA - {plan.capitalize()}"
 
-        sdk = mercadopago.SDK(os.environ.get("MERCADOPAGO_ACCESS_TOKEN", "TEST-4161746200257416-082622-44671e2ef63b4d4838b00ba7c2106e57-1961474241"))
+        sdk = mercadopago.SDK(os.environ["MERCADOPAGO_ACCESS_TOKEN"])
 
         preference_data = {
             "items": [
